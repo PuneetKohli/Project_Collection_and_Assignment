@@ -57,7 +57,8 @@ Given (/^a user$/) do |table|
   @user = User.create!(
     admin: false,
     email: data['Email'] || 'user1@test.com',
-    name: data['Name'] || 'TestUser',
+    firstname: data['Firstname'] || 'TestFirstName',
+    lastname: data['Lastname'] || 'TestLastName',
     password: data['Password'] || 'password',
     uin: data['UIN'] || '111111111',
     year: data['Year'] || '2018',
@@ -71,7 +72,8 @@ Given (/^an admin$/) do |table|
   @user = User.create!(
     admin: true,
     email: data['Email'] || 'admin1@test.com',
-    name: data['Name'] || 'TestAdmin',
+    firstname: data['Firstname'] || 'TestFirstName',
+    lastname: data['Lastname'] || 'TestLastName',
     password: data['Password'] || 'password',
     uin: data['UIN'] || '123123123',
     year: data['Year'] || '2018',
@@ -98,7 +100,7 @@ end
 
 Given (/^there exists a team$/) do |table|
   data = table.rows_hash
-  @user = User.find_by_name(data['User']) if data['User']
+  @user = User.find_by_uin(data['User_UIN']) if data['User_UIN']
   Team.create!(name: data['Name'] || 'TeamName',
                user_id: @user.id)
 end
@@ -124,11 +126,12 @@ end
 
 Given(/^I fill in the following details:$/) do |table|
   data = table.rows_hash
-  fill_in 'Name', with: data['Name']
+  fill_in 'First Name', with: data['Firstname']
+  fill_in 'Last Name', with: data['Lastname']
   fill_in 'UIN', with: data['UIN']
   fill_in 'Email', with: data['Email']
-  fill_in 'Password', with: data['Password']
-  fill_in 'Confirmation', with: data['Confirmation']
+  fill_in 'Password', with: data['Password'], match: :first
+  fill_in 'Confirm Password', with: data['Confirm Password']
   select data['Semester'], from: 'Semester'
   select data['Year'], from: 'Year'
   select data['Course'], from: 'Course'
@@ -167,7 +170,8 @@ end
 
 Then(/^I fill the updated details:$/) do |table|
   data = table.rows_hash
-  fill_in 'Name', with: data['Name']
+  fill_in 'First Name', with: data['Firstname']
+  fill_in 'Last Name', with: data['Lastname']
   fill_in 'Email', with: data['Email']
   fill_in 'UIN', with: data['UIN']
   fill_in 'New Password', with: data['New Password']
@@ -186,4 +190,8 @@ end
 Then(/^I fill the team code:$/) do |table|
   data = table.rows_hash
   fill_in 'relationship_code', with: data['Code'], visible: false
+end
+
+Then(/^I should get a download with the filename "([^\"]*)"$/) do |filename|
+  page.response_headers['Content-Disposition'].should include("filename=#{filename}")
 end
